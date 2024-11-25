@@ -1,4 +1,0 @@
-/usr/bin/cmake -DCMAKE_BUILD_TYPE=Debug -G "Unix Makefiles" -S /home/sunrise/programming/os_second/threads/lab5 -B /home/sunrise/programming/os_second/threads/lab5/cmake-build-debug
--- Configuring done
--- Generating done
--- Build files have been written to: /home/sunrise/programming/os_second/threads/lab5/cmake-build-debug
