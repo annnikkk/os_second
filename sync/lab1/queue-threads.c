@@ -19,12 +19,11 @@ void set_cpu(int n) {
     //n - номер процесса
     int err;
     cpu_set_t cpuset;
-    pthread_t tid = pthread_self();//поток из которого вызвана эта функция
+    pthread_t tid = pthread_self();
 
-    CPU_ZERO(&cpuset);//очистили набор процессоров
-    CPU_SET(n, &cpuset); //добавляем процессор n
+    CPU_ZERO(&cpuset);
+    CPU_SET(n, &cpuset);
 
-    //привязываем поток к процессору
     err = pthread_setaffinity_np(tid, sizeof(cpu_set_t), &cpuset);
     if (err) {
         printf("set_cpu: pthread_setaffinity failed for cpu %d\n", n);

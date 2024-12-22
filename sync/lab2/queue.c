@@ -34,6 +34,8 @@ queue_t *queue_init(int max_count) {
     //pthread_spin_init(&q->spinlock, PTHREAD_PROCESS_PRIVATE);
     //pthread_mutex_init(&q->mutex, PTHREAD_PROCESS_PRIVATE);
     sem_init(&q->semaphore, 0, 1);
+    //pthread_cond_init(&q->not_empty, NULL);
+    //pthread_cond_init(&q->not_full, NULL);
 
     q->add_attempts = q->get_attempts = 0;
     q->add_count = q->get_count = 0;
@@ -58,6 +60,8 @@ void queue_destroy(queue_t *q) {
     //pthread_spin_destroy(&q->spinlock);
     //pthread_mutex_destroy(&q->mutex);
     sem_destroy(&q->semaphore);
+    //pthread_cond_destroy(&q->not_empty);
+    //pthread_cond_destroy(&q->not_full);
 
     pthread_cancel(q->qmonitor_tid);
     pthread_join(q->qmonitor_tid, NULL);
@@ -76,6 +80,9 @@ int queue_add(queue_t *q, int val) {
         //pthread_spin_unlock(&q->spinlock);
         //pthread_mutex_unlock(&q->mutex);
         sem_post(&q->semaphore);
+        // while (q->count == q->max_count) {
+        //     pthread_cond_wait(&q->not_full, &q->mutex);
+        // }
         return 0;
     }
     //pthread_spin_unlock(&q->spinlock);
@@ -104,6 +111,7 @@ int queue_add(queue_t *q, int val) {
     q->add_count++;
     //pthread_spin_unlock(&q->spinlock);
     //pthread_mutex_unlock(&q->mutex);
+    //pthread_cond_signal(&q->not_empty);
     sem_post(&q->semaphore);
 
     return 1;
@@ -121,6 +129,9 @@ int queue_get(queue_t *q, int *val) {
         //pthread_spin_unlock(&q->spinlock);
         //pthread_mutex_unlock(&q->mutex);
         sem_post(&q->semaphore);
+        // while (q->count == 0) {
+        //     pthread_cond_wait(&q->not_empty, &q->mutex);
+        // }
         return 0;
     }
 
@@ -135,6 +146,7 @@ int queue_get(queue_t *q, int *val) {
     q->count--;
     //pthread_spin_unlock(&q->spinlock);
     //pthread_mutex_unlock(&q->mutex);
+    //pthread_cond_signal(&q->not_full);
     sem_post(&q->semaphore);
     q->get_count++;
 

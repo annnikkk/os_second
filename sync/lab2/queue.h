@@ -24,6 +24,8 @@ typedef struct _Queue {
 	pthread_spinlock_t spinlock;
 	pthread_mutex_t mutex;
 	sem_t semaphore;
+	pthread_cond_t not_empty;
+	pthread_cond_t not_full;
 
 	int count;
 	int max_count;
