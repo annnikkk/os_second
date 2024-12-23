@@ -31,9 +31,9 @@ queue_t *queue_init(int max_count) {
     q->max_count = max_count;
     q->count = 0;
 
-    //pthread_spin_init(&q->spinlock, PTHREAD_PROCESS_PRIVATE);
+    pthread_spin_init(&q->spinlock, PTHREAD_PROCESS_PRIVATE);
     //pthread_mutex_init(&q->mutex, PTHREAD_PROCESS_PRIVATE);
-    sem_init(&q->semaphore, 0, 1);
+    //sem_init(&q->semaphore, 0, 1);
     //pthread_cond_init(&q->not_empty, NULL);
     //pthread_cond_init(&q->not_full, NULL);
 
@@ -57,9 +57,9 @@ void queue_destroy(queue_t *q) {
         q->count--;
     }
 
-    //pthread_spin_destroy(&q->spinlock);
+    pthread_spin_destroy(&q->spinlock);
     //pthread_mutex_destroy(&q->mutex);
-    sem_destroy(&q->semaphore);
+    //sem_destroy(&q->semaphore);
     //pthread_cond_destroy(&q->not_empty);
     //pthread_cond_destroy(&q->not_full);
 
@@ -71,23 +71,23 @@ void queue_destroy(queue_t *q) {
 int queue_add(queue_t *q, int val) {
     q->add_attempts++;
 
-    //pthread_spin_lock(&q->spinlock);
+    pthread_spin_lock(&q->spinlock);
     //pthread_mutex_lock(&q->mutex);
-    sem_wait(&q->semaphore);
+    //sem_wait(&q->semaphore);
     assert(q->count <= q->max_count);
 
     if (q->count == q->max_count) {
-        //pthread_spin_unlock(&q->spinlock);
+        pthread_spin_unlock(&q->spinlock);
         //pthread_mutex_unlock(&q->mutex);
-        sem_post(&q->semaphore);
+        //sem_post(&q->semaphore);
         // while (q->count == q->max_count) {
         //     pthread_cond_wait(&q->not_full, &q->mutex);
         // }
         return 0;
     }
-    //pthread_spin_unlock(&q->spinlock);
+    pthread_spin_unlock(&q->spinlock);
     //pthread_mutex_unlock(&q->mutex);
-    sem_post(&q->semaphore);
+    //sem_post(&q->semaphore);
 
     qnode_t *new = malloc(sizeof(qnode_t));
     if (!new) {
@@ -97,9 +97,9 @@ int queue_add(queue_t *q, int val) {
     new->val = val;
     new->next = NULL;
 
-    //pthread_spin_lock(&q->spinlock);
+    pthread_spin_lock(&q->spinlock);
     //pthread_mutex_lock(&q->mutex);
-    sem_wait(&q->semaphore);
+    //sem_wait(&q->semaphore);
     if (!q->first)
         q->first = q->last = new;
     else {
@@ -109,10 +109,10 @@ int queue_add(queue_t *q, int val) {
 
     q->count++;
     q->add_count++;
-    //pthread_spin_unlock(&q->spinlock);
+    pthread_spin_unlock(&q->spinlock);
     //pthread_mutex_unlock(&q->mutex);
     //pthread_cond_signal(&q->not_empty);
-    sem_post(&q->semaphore);
+    //sem_post(&q->semaphore);
 
     return 1;
 }
@@ -120,15 +120,15 @@ int queue_add(queue_t *q, int val) {
 int queue_get(queue_t *q, int *val) {
     q->get_attempts++;
 
-    // pthread_spin_lock(&q->spinlock);
+    pthread_spin_lock(&q->spinlock);
     //pthread_mutex_lock(&q->mutex);
-    sem_wait(&q->semaphore);
+    //sem_wait(&q->semaphore);
     assert(q->count >= 0);
 
     if (q->count == 0) {
-        //pthread_spin_unlock(&q->spinlock);
+        pthread_spin_unlock(&q->spinlock);
         //pthread_mutex_unlock(&q->mutex);
-        sem_post(&q->semaphore);
+        //sem_post(&q->semaphore);
         // while (q->count == 0) {
         //     pthread_cond_wait(&q->not_empty, &q->mutex);
         // }
@@ -144,10 +144,10 @@ int queue_get(queue_t *q, int *val) {
 
     free(tmp);
     q->count--;
-    //pthread_spin_unlock(&q->spinlock);
+    pthread_spin_unlock(&q->spinlock);
     //pthread_mutex_unlock(&q->mutex);
     //pthread_cond_signal(&q->not_full);
-    sem_post(&q->semaphore);
+    //sem_post(&q->semaphore);
     q->get_count++;
 
     return 1;
@@ -155,14 +155,14 @@ int queue_get(queue_t *q, int *val) {
 
 
 void queue_print_stats(queue_t *q) {
-    //pthread_spin_lock(&q->spinlock);
+    pthread_spin_lock(&q->spinlock);
     //pthread_mutex_lock(&q->mutex);
-    sem_wait(&q->semaphore);
+    //sem_wait(&q->semaphore);
     printf("queue stats: current size %d; attempts: (%ld %ld %ld); counts (%ld %ld %ld)\n",
            q->count,
            q->add_attempts, q->get_attempts, q->add_attempts - q->get_attempts,
            q->add_count, q->get_count, q->add_count - q->get_count);
-    //pthread_spin_unlock(&q->spinlock);
+    pthread_spin_unlock(&q->spinlock);
     //pthread_mutex_unlock(&q->mutex);
-    sem_post(&q->semaphore);
+    //sem_post(&q->semaphore);
 }

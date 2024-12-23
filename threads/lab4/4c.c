@@ -57,7 +57,7 @@ void *mythread2(void *arg) {
     for(int i = 0; i < 3; i++) {
         printf("%s\n", str);
         sleep(1);
-        //pthread_exit(0);
+        pthread_exit(0);
     }
     pthread_cleanup_pop(1);
     free(str);
